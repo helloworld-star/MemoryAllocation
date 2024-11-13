@@ -1,7 +1,7 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include "top.h"
+#include "common.h"
 
 struct Block
 {

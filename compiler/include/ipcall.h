@@ -1,7 +1,7 @@
 #ifndef IPCALL_H
 #define IPCALL_H
 
-#include "top.h"
+#include "common.h"
 #include "init.h"
 
 void read_IP_state(struct IP *IPArray);

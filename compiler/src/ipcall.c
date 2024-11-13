@@ -38,7 +38,9 @@ void load(struct Blockarray *block_array, struct IP_block_list *load_list, uint3
         if(block_array->blocks[block_count].taken == false)
         {
             // 汇编 将数据从片外读入片内
-
+            #ifdef SIM
+                //sim_load();
+            #endif
             // Set block_array state
             block_array->blocks[block_count].taken = true;
             // Record the Block ID
