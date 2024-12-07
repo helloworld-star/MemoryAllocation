@@ -28,7 +28,7 @@ void appendNode(struct HeaderNode* head, uint8_t REG_ID, uint8_t data_len) {
     newNode->next = NULL;
 
     struct Node* last = head->next;
-    if (last == NULL) {
+    if(last == NULL) {
         head->next = newNode;
         return;
     }

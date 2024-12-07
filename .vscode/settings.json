@@ -3,6 +3,7 @@
         "stdint.h": "c",
         "stdio.h": "c",
         "common.h": "c",
-        "sim.h": "c"
+        "sim.h": "c",
+        "stdbool.h": "c"
     }
 }

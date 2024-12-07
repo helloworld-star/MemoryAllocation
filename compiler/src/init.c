@@ -1,15 +1,19 @@
 #include "init.h"
 
-void Block_init(struct Blockarray *block_array)
+void Block_init(struct Blockarray *blockArray)
 {
     uint8_t i;
     for(i = 0; i < BLOCK_NUM; i++)
-    {
-        block_array->blocks[i].int_addr = 0;
-        block_array->blocks[i].taken = false;
+    {   
+        #ifdef ENABLE_SIM_MODE
+            blockArray->blocks[i].int_addr = &int_mem[i * BLOCK_SIZE];
+        #else
+            blockArray->blocks[i].int_addr = 0;
+        #endif
+        blockArray->blocks[i].taken = false;
     }
 
-    block_array->block_free_num = BLOCK_NUM;
+    blockArray->block_free_num = BLOCK_NUM;
     return;
 }
 

@@ -1,7 +1,7 @@
 // #include "common.h"
 // #include "init.h"
 
-// int main0()
+// int main()
 // {
 //     struct Blockarray blockArray;
 //     struct IP IPArray[IP_NUM];
@@ -23,7 +23,7 @@
 //     {
 //         read_IP_state(&IPArray);
         
-//         if (start_load == true && IPArray[LS].IP_state == IDLE)
+//         if(start_load == true && IPArray[LS].IP_state == IDLE)
 //         {
 //             CheckBoundary(&blockArray, 1024);
 //         }

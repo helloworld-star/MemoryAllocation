@@ -4,8 +4,9 @@
 #include "common.h"
 
 #define act_col 3
-#define act_row 1024
 
 #define fil_num 192
+
+void Assert(uint32_t judge, char *str);
 
 #endif
