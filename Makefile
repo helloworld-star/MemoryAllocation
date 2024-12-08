@@ -7,14 +7,13 @@ INC_PATH ?= $(COM_HOME)/compiler/include
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 
 CC := gcc
-CFLAGS += -Wall -static
+CFLAGS += -Wall -static -g
 
 TARGET = main.elf
 
 ifdef RISCV
 	CC = riscv64-unknown-elf-gcc
-    CFLAGS += -static
-	CFLAGS += -ffunction-sections -fdata-sections -march=rv64g -mabi=lp64d -g
+	CFLAGS += -ffunction-sections -fdata-sections -march=rv64g -mabi=lp64d
 	CFLAGS += -mcmodel=medany
 	CFLAGS += ${LDFLAGS}
 endif
@@ -30,6 +29,14 @@ com: ${CSRCS} ${INC_PATH}
 
 run: com
 	./${TARGET}
+
+gdb: com
+ifdef RISCV
+	riscv64-unknown-elf-gdb ${TARGET}
+else
+	gdb ${TARGET}
+endif
+
 
 clean:
 	rm -rf ${TARGET}

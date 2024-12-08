@@ -10,9 +10,8 @@
 #endif
 
 void read_IP_state(struct IP *IPArray);
-bool CheckBoundary(struct Blockarray *BlockArray, uint32_t block_need);
-void load(struct Blockarray *blockArray, struct IP_block_list *load_list, struct EXT2INT_Bundle mem_bundle);
-void conv(struct Blockarray *BlockArray, struct IP *IPArray, uint8_t IP_ID, uint32_t act_ID, uint32_t fil_ID, uint32_t out_addr);
-
+bool CheckBoundary(struct Blockarray *BlockArray, uint8_t block_need);
+void load(struct Blockarray *blockArray, struct IP_block_list *load_list, struct BlkCtrl_Bundle blk_bundle);
+void conv(struct Blockarray *blockArray, struct IP_block_list *act_list, struct IP_block_list *filter_list, uint32_t output_len);
 
 #endif

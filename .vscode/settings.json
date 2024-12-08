@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "common.h": "c",
         "sim.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "sim_common.h": "c"
     }
 }

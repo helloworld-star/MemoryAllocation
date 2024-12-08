@@ -10,15 +10,15 @@
 
 struct Block
 {
-    uint8_t *int_addr;  // This block internal addr
-    bool taken;     // Is taken by IP
+    uint8_t *int_addr;  /* This block internal addr */
+    bool taken;     /* Is taken by IP */
 };
 
 struct IP
 {
-    uint8_t *IP_addr; // This IP first addr
-    uint8_t IP_ID; // The ID of this IP
-    uint8_t IP_state;  // The state of this IP
+    uint8_t *IP_addr; /* This IP first addr */
+    uint8_t IP_ID; /* The ID of this IP */
+    uint8_t IP_state;  /* The state of this IP */
 };
 
 struct  Blockarray
@@ -30,8 +30,8 @@ struct  Blockarray
 struct IP_block_list
 {
     uint8_t DATA_TYPE;
-    int8_t block_list[BLOCK_NUM]; // Record the used block ID of IP
-    uint32_t res_len; // The len of resdual len (The other block takes the full BLOCK_SIZE of itself)
+    int8_t block_list[BLOCK_NUM]; /* Record the used block ID of IP */
+    uint32_t res_len; /* The len of resdual len (The other block takes the full BLOCK_SIZE of itself) */
 };
 
 void Block_init(struct Blockarray *blockArray);

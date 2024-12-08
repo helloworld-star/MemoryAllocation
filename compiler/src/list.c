@@ -4,9 +4,9 @@
 #include "common.h"
 
 struct Node {
-    uint8_t REG_ID; // 
+    uint8_t REG_ID; /*  */
     uint8_t data_len;
-    struct Node* next;  // 指向下一个节点的指针
+    struct Node* next;  /* 指向下一个节点的指针 */
 };
 
 struct HeaderNode {
@@ -19,7 +19,7 @@ struct HeaderNode* createList() {
     return head;
 }
 
-// 添加节点到链表末尾
+/* 添加节点到链表末尾  */
 void appendNode(struct HeaderNode* head, uint8_t REG_ID, uint8_t data_len) {
 
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
