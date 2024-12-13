@@ -3,10 +3,10 @@
 
 // int main()
 // {
-//     struct Blockarray blockArray;
+//     struct BlockArray blockarray;
 //     struct IP IPArray[IP_NUM];
 
-//     Block_init(&blockArray);
+//     Block_init(&blockarray);
 //     IP_init(&IPArray);
 
 //     struct IP_block_list input_block_list;
@@ -25,7 +25,7 @@
         
 //         if(start_load == true && IPArray[LS].IP_state == IDLE)
 //         {
-//             CheckBoundary(&blockArray, 1024);
+//             CheckBoundary(&blockarray, 1024);
 //         }
 
 

@@ -14,10 +14,10 @@ void read_IP_state(struct IP *IPArray)
     return;
 }
 
-bool CheckBoundary(struct Blockarray *blockArray, uint8_t block_need)
+bool CheckBoundary(struct BlockArray *blockarray, uint8_t block_need)
 {
-    //printf("block_free_num: %d\n", blockArray->block_free_num);
-    if(blockArray->block_free_num < block_need)
+    //printf("free_num: %d\n", blockarray->free_num);
+    if(blockarray->free_num < block_need)
     {
         printf("No enough space for loading\n");
         return false;
@@ -26,12 +26,12 @@ bool CheckBoundary(struct Blockarray *blockArray, uint8_t block_need)
     return true;
 }
 
-void load(struct Blockarray *blockArray, struct IP_block_list *load_list, struct BlkCtrl_Bundle blkctrl_bundle)
+void load(struct BlockArray *blockarray, struct IP_block_list *load_list, struct BlkCtrl_Bundle blkctrl_bundle)
 {
     /* The number of blocks needed */
     int8_t block_need = cell((float)blkctrl_bundle.total_len);
 
-    bool enough = CheckBoundary(blockArray, block_need);
+    bool enough = CheckBoundary(blockarray, block_need);
     if (enough == false)
     {
         // store();
@@ -42,57 +42,35 @@ void load(struct Blockarray *blockArray, struct IP_block_list *load_list, struct
     /* EXT2INT bunble tansfer to Blk_Bundle (add int_addr) */
     struct Blk_Bundle blk_bundle;
     blk_bundle.ext_addr = blkctrl_bundle.ext_addr;
+	blk_bundle.int_addr = BLOCK(blockarray->free_start);
+	blk_bundle.len = blkctrl_bundle.total_len;
 
-    uint32_t res_len = blkctrl_bundle.total_len % BLOCK_SIZE;
-    blk_bundle.len = block_need == 1 ? res_len : BLOCK_SIZE;
-    load_list->res_len = res_len;
-
-    blockArray->block_free_num -= block_need;
-
-    uint8_t block_count = 0;
-    uint8_t list_count = 0;
-
-    for(block_count = 0; (block_count < BLOCK_NUM); block_count++)
-    {
-        if(blockArray->blocks[block_count].taken == false)
-        {
-            blk_bundle.int_addr = blockArray->blocks[block_count].int_addr;
-            // printf("Block int_addr: %ld\n", (uint64_t)(blk_bundle.int_addr));
-
-            // 汇编 将数据从片外读入片内
-            #ifdef ENABLE_SIM_MODE
-                printf("Sim load!\n");
-                sim_load(blk_bundle);
-            #else
+    #ifdef ENABLE_SIM_MODE
+    	printf("Sim load!\n");
+        sim_load(blk_bundle);
+    #else
                 
-            #endif
+    #endif
 
-            /* Set blockArray state */
-            blockArray->blocks[block_count].taken = true;
-            /* Record the Block ID */
-            load_list->block_list[list_count] = block_count;
+	/* Record start and num for deleting after conv */
+	load_list->block_start = blockarray->free_start;
+	load_list->block_num = block_need; 
+    load_list->len = blkctrl_bundle.total_len; 
 
-            list_count++;
-            block_need--;
-            if (block_need == 0)
-                break;
-            /* After a block loading, update the state. */
-            blk_bundle.ext_addr = blk_bundle.ext_addr + BLOCK_SIZE;
-            /* res_len > 0: last block loading res_len */
-            /* res_len == 0: last block loading BLOCK_SIZE (res_len =0, No data will be loaded) */
-            blk_bundle.len = (block_need == 1 && res_len != 0) ? res_len : BLOCK_SIZE;
-        }
-    }
+	/* Update blockarray state */
+	blockarray->free_start += block_need;
+	blockarray->free_start = (blockarray->free_start > (BLOCK_NUM-1)) ? (blockarray->free_start - BLOCK_NUM) : blockarray->free_start;
+    blockarray->free_num -= block_need;
 
     return;
 }
 
-void conv(struct Blockarray *blockArray, struct IP_block_list *act_list, struct IP_block_list *filter_list, uint32_t output_len)
+void conv(struct BlockArray *blockarray, struct IP_block_list *act_list, struct IP_block_list *filter_list, uint32_t output_len)
 {
     /* The number of blocks needed for output */
     int8_t block_need = cell((float)output_len);
 
-    bool enough = CheckBoundary(blockArray, block_need);
+    bool enough = CheckBoundary(blockarray, block_need);
     if (enough == false)
     {
         // store();
@@ -100,26 +78,19 @@ void conv(struct Blockarray *blockArray, struct IP_block_list *act_list, struct 
         return;
     }
 
-    blockArray->block_free_num -= block_need;
-
     /* Need to update. */
-    // uint32_t res_len = output_len % BLOCK_SIZE; 
-
     struct Conv_Bundle conv_bundle;
-    conv_bundle.act_len = act_list->res_len;
-    conv_bundle.fil_len = filter_list->res_len;
-    conv_bundle.act_addr = blockArray->blocks[act_list->block_list[0]].int_addr;
-    conv_bundle.fil_addr = blockArray->blocks[filter_list->block_list[0]].int_addr;
+    conv_bundle.act_len = act_list->len;
+    conv_bundle.fil_len = filter_list->len;
+    conv_bundle.act_addr = BLOCK(act_list->block_start);
+    conv_bundle.fil_addr = BLOCK(filter_list->block_start);
 
-    uint32_t block_count;
-    for(block_count = 0; (block_count < BLOCK_NUM); block_count++)
-    {
-        if(blockArray->blocks[block_count].taken == false)
-        {
-            conv_bundle.out_addr = blockArray->blocks[block_count].int_addr;
-            break;
-        }
-    }
+    conv_bundle.out_addr = BLOCK(blockarray->free_start);
+
+    /* Update blockarray state */
+    blockarray->free_start += block_need;
+	blockarray->free_start = (blockarray->free_start > (BLOCK_NUM-1)) ? (blockarray->free_start - BLOCK_NUM) : blockarray->free_start;
+    blockarray->free_num -= block_need;
 
     /* Need to update. If the output needs more blocks, maybe the number act and filter should be spilt to make the output can be saved in one block. */
     #ifdef ENABLE_SIM_MODE

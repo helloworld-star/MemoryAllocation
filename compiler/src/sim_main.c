@@ -12,7 +12,7 @@ uint32_t output_len[4] = {FILTER1_OUT_LEN, FILTER2_OUT_LEN, FILTER3_OUT_LEN, FIL
 
 int main()
 {
-    struct Blockarray blockArray;
+    struct BlockArray blockarray;
     struct IP IPArray[IP_NUM];
 
     #ifdef ENABLE_SIM_MODE
@@ -20,23 +20,11 @@ int main()
         init_sim();
     #endif
 
-    Block_init(&blockArray);
-    #ifdef ENABLE_SIM_MODE
-        for (uint8_t i = 0; i < BLOCK_NUM; i++)
-        {
-            // printf("block_addr: %ld\n",  (uint64_t)(blockArray.blocks[i].int_addr));
-            // printf("int_addr: %ld\n",  (uint64_t)(&int_mem[i * BLOCK_SIZE]));
-            Assert((uint64_t)(blockArray.blocks[i].int_addr) == (uint64_t)(&int_mem[i * BLOCK_SIZE]), "In init!");
-        }
-    #endif
+    Block_init(&blockarray);
     IP_init(IPArray);
 
     struct IP_block_list input_block_list;
     struct IP_block_list filter_block_list;
-
-    /* Input only load once, in rest cycles, it is used as output (next model's input) */
-    block_list_init(&input_block_list, CONV_INPUT);
-    block_list_init(&filter_block_list, CONV_FILTER);
 
     /* 速度 谁等谁 */
     bool start_load = true;
@@ -55,13 +43,12 @@ int main()
                 input_bundle.ext_addr = &ext_act[0];
             #else
             #endif
-            load(&blockArray, &input_block_list, input_bundle);
+            load(&blockarray, &input_block_list, input_bundle);
 
             #ifdef ENABLE_SIM_MODE
                 for (uint32_t i = 0; i < INPUT_LEN; i++)
                 {
                     // printf("ext_act: %ld\n",  (uint64_t)(ext_act[i]));
-                    // printf("int_filter: %ld\n",  (uint64_t)(int_mem[i]));
                     // printf("int_filter: %ld\n",  (uint64_t)(BLOCK(0)[i]));
                     Assert((uint64_t)(ext_act[i]) == (uint64_t)(BLOCK(0)[i]), "In load!");
                 }
@@ -78,7 +65,7 @@ int main()
         {
             input_bundle.total_len = filter_len[0];
             input_bundle.ext_addr = &ext_filter[0];
-            load(&blockArray, &filter_block_list, input_bundle);
+            load(&blockarray, &filter_block_list, input_bundle);
 
             #ifdef ENABLE_SIM_MODE
                 for (uint32_t i = 0; i < filter_len[0]; i++)
@@ -94,7 +81,7 @@ int main()
 
         if(start_load == false && IPArray[CONV].IP_state == IDLE)
         {
-            conv(&blockArray, &input_block_list, &filter_block_list, output_len[0]);
+            conv(&blockarray, &input_block_list, &filter_block_list, output_len[0]);
             conv_count++;
             start_load = true;
         }

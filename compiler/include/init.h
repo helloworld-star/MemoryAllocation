@@ -14,6 +14,16 @@ struct Block
     bool taken;     /* Is taken by IP */
 };
 
+/* Free Start = Taken End; Free End == Taken Start */
+/* Free: Block Num - |Free Start - Free End| */
+/* Taken: Block Num - |Free End - Free Start| */
+struct BlockArray
+{
+    uint8_t free_start;
+    uint8_t free_end;
+    uint8_t free_num;
+};
+
 struct IP
 {
     uint8_t *IP_addr; /* This IP first addr */
@@ -21,23 +31,15 @@ struct IP
     uint8_t IP_state;  /* The state of this IP */
 };
 
-struct  Blockarray
-{
-    struct Block blocks[BLOCK_NUM];
-    uint8_t block_free_num;
-};
-
 struct IP_block_list
 {
-    uint8_t DATA_TYPE;
-    int8_t block_list[BLOCK_NUM]; /* Record the used block ID of IP */
-    uint32_t res_len; /* The len of resdual len (The other block takes the full BLOCK_SIZE of itself) */
+	uint8_t block_start;
+	uint8_t block_num; /* For deleting */
+    uint16_t len;
 };
 
-void Block_init(struct Blockarray *blockArray);
+void Block_init(struct BlockArray *blockarray);
 
 void IP_init(struct IP *IP_array);
-
-void block_list_init(struct IP_block_list *taken_block, uint8_t DATA_TYPE);
 
 #endif

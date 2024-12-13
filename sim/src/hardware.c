@@ -13,7 +13,7 @@ void init_act()
     {
         ext_act[i] = j;
         j++;
-        j = j == 20 ? 0 : j;
+        j = j == 30 ? 0 : j;
     }
 
     return;
@@ -26,7 +26,7 @@ void init_filter()
     {
         ext_filter[i] = j;
         j++;
-        j = j == 10 ? 0 : j;
+        j = j == 20 ? 0 : j;
     }
 
     return;
@@ -46,11 +46,11 @@ void init_int_mem()
 void sim_load(struct Blk_Bundle blk_bundle)
 {
     IP_state[LS] = BUSY;
+    
     // printf("Len: %ld\n",  (uint64_t)(blk_bundle.len));
     for (uint64_t i = 0; i < blk_bundle.len; i++) 
     {
         blk_bundle.int_addr[i] = blk_bundle.ext_addr[i];
-            
         // printf("int_value: %ld\n",  (uint64_t)(blk_bundle.int_addr[i]));
         // printf("ext_value: %ld\n",  (uint64_t)(blk_bundle.ext_addr[i]));
     }
