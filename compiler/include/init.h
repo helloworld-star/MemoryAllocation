@@ -20,7 +20,6 @@ struct Block
 struct BlockArray
 {
     uint8_t free_start;
-    uint8_t free_end;
     uint8_t free_num;
 };
 
@@ -35,7 +34,7 @@ struct IP_block_list
 {
 	uint8_t block_start;
 	uint8_t block_num; /* For deleting */
-    uint16_t len;
+    uint32_t len;
 };
 
 void Block_init(struct BlockArray *blockarray);

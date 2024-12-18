@@ -62,6 +62,10 @@ void load(struct BlockArray *blockarray, struct IP_block_list *load_list, struct
 	blockarray->free_start = (blockarray->free_start > (BLOCK_NUM-1)) ? (blockarray->free_start - BLOCK_NUM) : blockarray->free_start;
     blockarray->free_num -= block_need;
 
+    #ifdef ENABLE_SIM_MODE
+        printf("blockarray.free_num: %d\n", blockarray->free_num);
+    #endif
+
     return;
 }
 
@@ -78,19 +82,13 @@ void conv(struct BlockArray *blockarray, struct IP_block_list *act_list, struct 
         return;
     }
 
-    /* Need to update. */
     struct Conv_Bundle conv_bundle;
     conv_bundle.act_len = act_list->len;
     conv_bundle.fil_len = filter_list->len;
     conv_bundle.act_addr = BLOCK(act_list->block_start);
     conv_bundle.fil_addr = BLOCK(filter_list->block_start);
-
     conv_bundle.out_addr = BLOCK(blockarray->free_start);
-
-    /* Update blockarray state */
-    blockarray->free_start += block_need;
-	blockarray->free_start = (blockarray->free_start > (BLOCK_NUM-1)) ? (blockarray->free_start - BLOCK_NUM) : blockarray->free_start;
-    blockarray->free_num -= block_need;
+    conv_bundle.out_len = output_len;
 
     /* Need to update. If the output needs more blocks, maybe the number act and filter should be spilt to make the output can be saved in one block. */
     #ifdef ENABLE_SIM_MODE
@@ -98,6 +96,22 @@ void conv(struct BlockArray *blockarray, struct IP_block_list *act_list, struct 
         sim_conv(conv_bundle);
     #else
         
+    #endif
+
+    /*Update input_list (output addr) and blockarray state */
+    act_list->block_start = blockarray->free_start;
+    blockarray->free_start += block_need;
+    blockarray->free_start = (blockarray->free_start > (BLOCK_NUM-1)) ? (blockarray->free_start - BLOCK_NUM) : blockarray->free_start;
+
+    blockarray->free_num += act_list->block_num;
+    blockarray->free_num += filter_list->block_num;
+    blockarray->free_num -= block_need;
+    act_list->block_num = block_need;
+    act_list->len = output_len;
+
+    #ifdef ENABLE_SIM_MODE
+        printf("block_need: %d\n", block_need);
+        printf("blockarray.free_num: %d\n", blockarray->free_num);
     #endif
 
     return;

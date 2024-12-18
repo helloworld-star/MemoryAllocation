@@ -57,14 +57,16 @@ int main()
         }
     }
 
+    uint8_t fliter_count = 0;
+    uint8_t output_count = 0;
     while(1)
     {
         read_IP_state(IPArray);
         
         if(start_load == true && IPArray[LS].IP_state == IDLE)
         {
-            input_bundle.total_len = filter_len[0];
-            input_bundle.ext_addr = &ext_filter[0];
+            input_bundle.total_len = filter_len[fliter_count];
+            input_bundle.ext_addr = &ext_filter[fliter_count];
             load(&blockarray, &filter_block_list, input_bundle);
 
             #ifdef ENABLE_SIM_MODE
@@ -81,13 +83,20 @@ int main()
 
         if(start_load == false && IPArray[CONV].IP_state == IDLE)
         {
-            conv(&blockarray, &input_block_list, &filter_block_list, output_len[0]);
+            conv(&blockarray, &input_block_list, &filter_block_list, output_len[output_count]);
             conv_count++;
             start_load = true;
         }
 
+        fliter_count++;
+        output_count++;
+        
+
+        
+        if (fliter_count == 3)
+            break;
+        
         printf("Success\n");
-        break;
 
         // if(conv_count == CONV_LAYER)
         // {
@@ -96,9 +105,12 @@ int main()
         // }
     }
 
-    write_to_file(BLOCK(0), INPUT_LEN, 3, "./test/Input.txt");
-    write_to_file(BLOCK(1), filter_len[0], 3, "./test/Filter.txt");
-    write_to_file(BLOCK(2), FILTER1_OUT_LEN, 32, "./test/Output.txt");
+    #ifdef ENABLE_SIM_MODE
+        // write_to_file(BLOCK(0), INPUT_LEN, 3, "./test/Input.txt");
+        // write_to_file(BLOCK(1), filter_len[0], 3, "./test/Filter.txt");
+        // write_to_file(BLOCK(2), FILTER1_OUT_LEN, 32, "./test/Output.txt");
+        write_to_file(BLOCK(0), BLOCK_NUM * BLOCK_SIZE, BLOCK_SIZE, "./test/layer3.txt");
+    #endif
 
     return 0;
 }

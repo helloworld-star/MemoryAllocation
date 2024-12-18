@@ -61,22 +61,40 @@ void sim_conv(struct Conv_Bundle conv_bundle)
 {
     IP_state[CONV] = BUSY;
     
-    uint32_t input_dim = conv_bundle.act_len / act_row; // act_len 应等于 act_row * input_dim
-    uint32_t filter_num = conv_bundle.fil_len / input_dim; // fil_len 应等于 filter_num * input_dim
+    uint32_t input_dim = conv_bundle.act_len / act_row; // act_len == act_row * input_dim
+    uint32_t filter_num = conv_bundle.fil_len / input_dim; // fil_len == filter_num * input_dim
     printf("Input dim: %d, Filter num: %d\n", input_dim, filter_num);
+
+    uint8_t *result = malloc(sizeof(uint8_t) * filter_num * act_row);
 
     for (uint32_t i = 0; i < act_row; i++) 
     {
         for (uint32_t j = 0; j < filter_num; j++)
-        {
-            conv_bundle.out_addr[i * filter_num + j] = 0; 
+        {   
+            result[i * filter_num + j] = 0; 
             for (uint32_t k = 0; k < input_dim; k++) 
             {  
-                conv_bundle.out_addr[i * filter_num + j] += conv_bundle.act_addr[i * input_dim + k] * conv_bundle.fil_addr[j * input_dim + k];
+                result[i * filter_num + j] += conv_bundle.act_addr[i * input_dim + k] * conv_bundle.fil_addr[j * input_dim + k];
             }
         }
     }
-
+    
+    for (uint32_t i = 0; i < conv_bundle.out_len; i++)
+    {
+        conv_bundle.out_addr[i] = result[i];
+        if (((uint64_t) (&conv_bundle.out_addr[i])) == ((uint64_t)(BLOCK(32)-1))) 
+        {
+            conv_bundle.out_addr = BLOCK(0);
+            printf("i: %d\n", i);
+            conv_bundle.out_len = conv_bundle.out_len - i;
+            i = -1;
+        }
+    }
+    // if (((uint64_t) (&conv_bundle.out_addr[i * filter_num + j])) == ((uint64_t)(BLOCK(32)-1))) 
+    // {
+    //     conv_bundle.out_addr = BLOCK(0);
+    //     printf("out_addr: %ld\n",  (uint64_t)(&conv_bundle.out_addr[i * filter_num + j]));
+    // }
 
     IP_state[CONV] = IDLE;
 
